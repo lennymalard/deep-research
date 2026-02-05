@@ -143,44 +143,44 @@ class Writer:
 def route_plan_to_search(state: SystemState):
     return [Send("search", {"search_query": query_item.query, "user_query": state["user_query"], "search_results": state["search_results"] if "search_results" in state.keys() else []}) for query_item in state["search_queries"]]
 
-if __name__ == "__main__":
-    query_generator = QueryGenerator()
-    researcher = Researcher()
-    reviewer = Reviewer()
-    writer = Writer()
 
-    graph = StateGraph(SystemState)
+query_generator = QueryGenerator()
+researcher = Researcher()
+reviewer = Reviewer()
+writer = Writer()
 
-    graph.add_node("generate_queries", query_generator.generate_queries)
-    graph.add_node("search", researcher.search)
-    graph.add_node("review", reviewer.review)
-    graph.add_node("write", writer.write)
+graph = StateGraph(SystemState)
 
-    graph.add_conditional_edges(
-        "generate_queries",
-        route_plan_to_search,
-        ["search"]
-    )
+graph.add_node("generate_queries", query_generator.generate_queries)
+graph.add_node("search", researcher.search)
+graph.add_node("review", reviewer.review)
+graph.add_node("write", writer.write)
 
-    graph.add_edge("search", "review")
-    graph.add_conditional_edges(
-        "review",
-        reviewer.is_search_complete,
-        {True: "write", False: "generate_queries"}
-    )
-    graph.add_edge("write", END)
+graph.add_conditional_edges(
+    "generate_queries",
+    route_plan_to_search,
+    ["search"]
+)
 
-    graph.set_entry_point("generate_queries")
-    graph = graph.compile()
+graph.add_edge("search", "review")
+graph.add_conditional_edges(
+    "review",
+    reviewer.is_search_complete,
+    {True: "write", False: "generate_queries"}
+)
+graph.add_edge("write", END)
 
-    user_query = "Qui est le directeur artistique de Versace ?"
+graph.set_entry_point("generate_queries")
+graph = graph.compile()
 
-    state: SystemState = {
-        "user_query": user_query,
-    }
+"""user_query = "Qui est le directeur artistique de Versace ?"
 
-    final_state = graph.invoke(state)
+state: SystemState = {
+    "user_query": user_query,
+}
 
-    report = final_state["report"]
-    print(report)
-    save_report(user_query=user_query,report=report, file_name="report")
+final_state = graph.invoke(state)
+
+report = final_state["report"]
+print(report)
+save_report(user_query=user_query,report=report, file_name="report")"""

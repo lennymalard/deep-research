@@ -5,7 +5,8 @@ import os
 from ddgs import DDGS
 from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_classic.retrievers.document_compressors import FlashrankRerank
+from flashrank import Ranker
+from langchain_community.document_compressors import FlashrankRerank
 from langchain_classic.retrievers import ContextualCompressionRetriever
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -82,10 +83,6 @@ def get_top_k(query: str, vector_store: FAISS, k: int = 5):
     return compressor_retriever.invoke(query)
 
 def save_report(user_query: str, report: str, file_name: str):
-    file = f"""
-    [USER QUERY]: {user_query}
-    
-    [REPORT]: {report}
-    """
+    file = f"[USER QUERY]: {user_query}\n\n[REPORT]: {report}"
     with open(file_name, "w") as f:
         f.write(file)

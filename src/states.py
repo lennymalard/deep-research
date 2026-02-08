@@ -9,9 +9,11 @@ class SystemState(TypedDict):
     summaries : Annotated[List[dict[str, str]], operator.add]
     review: dict[str, str]
     report: str
+    search_iteration: int
 
 class QueryGeneratorState(TypedDict):
     user_query : str
+    search_iteration: int
 
 class ResearcherState(TypedDict):
     user_query: str
@@ -21,6 +23,7 @@ class ResearcherState(TypedDict):
 class ReviewerState(TypedDict):
     summaries : List[dict[str, str]]
     user_query: str
+    search_iteration: int
 
 class WriterState(TypedDict):
     summaries : List[dict[str, str]]

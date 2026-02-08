@@ -5,7 +5,6 @@ import os
 from ddgs import DDGS
 from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import FAISS
-from flashrank import Ranker
 from langchain_community.document_compressors import FlashrankRerank
 from langchain_classic.retrievers import ContextualCompressionRetriever
 from langchain_text_splitters import RecursiveCharacterTextSplitter

@@ -85,7 +85,6 @@ streamlit run app.py
 
 ## ⚠️ Notes
 
-* **Iteration Limits**: The Reviewer can sometimes be too picky, leading to multiple loops.
 * **Local Latency**: Since everything is local, the embedding and re-ranking steps take time—this is a "slow and steady" research explorer.
 
 ---

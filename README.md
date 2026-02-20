@@ -1,12 +1,3 @@
-Here is a summary of the updates I made to your `README.md` to reflect the latest changes in your codebase:
-
-* **Added the Evaluator Agent:** The workflow now includes a 5th agent, the Evaluator (Arbiter), which acts as an anti-hallucination guardrail.
-* **Parallel Writing:** Updated the Writer's description to reflect that it now generates multiple candidate reports in parallel for the Evaluator to score.
-* **Model Prerequisites:** Added `qwen3:14b` to the Ollama requirements, as it is now used by the Writer and Evaluator classes.
-* **UI Updates:** Added the evaluation step to the Streamlit implementation details.
-
-Here is the updated `README.md` content:
-
 # 🕵️ Local Deep Research Agent
 
 > A focused project built to **explore multi-agent systems with LangGraph**. This experiment orchestrates a team of autonomous agents to test iterative, self-correcting research workflows in a local environment.

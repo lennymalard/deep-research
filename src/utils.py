@@ -37,7 +37,6 @@ class DDGSearch:
         response = requests.get(
             url=f"https://r.jina.ai/{url}",
             headers={
-                "Authorization": f"Bearer {os.environ['JINA_API_KEY']}",
                 "X-Retain-Images": "none",
                 "X-Return-Format": "markdown"
             }

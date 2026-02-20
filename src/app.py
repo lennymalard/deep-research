@@ -29,8 +29,10 @@ if user_input := st.chat_input("What do you want to research?"):
                     elif key == "review":
                         status_container.write("🧐 Reviewing findings...")
                     elif key == "write":
-                        status_container.update(label="Writing Report", state="complete", expanded=False)
-                        final_report = value["report"]
+                        status_container.write("✍️ Drafting reports...")
+                    elif key == "evaluate":
+                        status_container.update(label="Research Complete", state="complete", expanded=False)
+                        final_report = value["final_report"]
 
             st.markdown(final_report)
             st.session_state.messages.append({"role": "assistant", "content": final_report})

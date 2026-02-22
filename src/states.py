@@ -61,37 +61,32 @@ class Write(BaseModel):
     report: str = Field(
         description="A professional, structured report in Markdown format. It must answer the user query in depth using ONLY the provided page summaries, including inline citations [Source: URL] for every fact."
     )
-    confidence: int = Field(
-        ge=1, le=10,
-        description="A 1-10 score of your fidelity to the sources. 10 = you successfully transcribed explicit facts with zero interpretation; 1 = the sources were messy or incomplete, forcing you to interpret, infer, or bridge gaps to make the report coherent."
+    confidence: str = Field(
+        description="A brief statement expressing your confidence in the written facts. Explicitly flag any claims that rely on inference, assumptions, or weak source material."
     )
 
-class EvaluationItem(BaseModel):
-    report_index: int = Field(
-        description="The index number of the report being evaluated (e.g., 0, 1, 2, 3, 4)."
-    )
-    faithfulness: int = Field(
+class GradeItem(BaseModel):
+    grade: int = Field(
         ge=1, le=10,
-        description="1-10 scale of factual grounding. 10 = all claims are explicitly backed by the provided sources with no hallucinations. 1 = the report fabricates information or directly contradicts the source material."
+        description="The integer score from 1 to 10."
     )
-    answer_relevance: int = Field(
-        ge=1, le=10,
-        description="1-10 scale of intent matching. 10 = directly, concisely, and completely answers the user's specific prompt without tangential fluff. 1 = completely misses the point of the user's query."
-    )
-    context_completeness: int = Field(
-        ge=1, le=10,
-        description="1-10 scale of source utilization. 10 = successfully extracts and includes all critical information and caveats from the provided sources. 1 = poorly cherry-picks data, leaving out major context or counter-arguments."
-    )
-    formatting_quality: int = Field(
-        ge=1, le=10,
-        description="1-10 scale of structure and readability. 10 = professional, clean Markdown with logical headers, bullet points, and high readability. 1 = a broken, disorganized wall of text."
-    )
-    synthesis_quality: int = Field(
-        ge=1, le=10,
-        description="1-10 scale of narrative cohesion. 10 = seamlessly weaves multiple sources together into a logical, flowing narrative. 1 = reads like a disjointed, copy-pasted list of separate summaries."
+    comment: str = Field(
+        description="A brief justification explaining why this score was given."
     )
 
 class Evaluate(BaseModel):
-    marks: List[EvaluationItem] = Field(
-        description="A list containing the detailed scoring for each candidate report."
+    faithfulness: GradeItem = Field(
+        description="1-10 scale of factual grounding. 10 = all claims are explicitly backed by the provided sources with no hallucinations. 1 = the report fabricates information or directly contradicts the source material."
+    )
+    answer_relevance: GradeItem = Field(
+        description="1-10 scale of intent matching. 10 = directly, concisely, and completely answers the user's specific prompt without tangential fluff. 1 = completely misses the point of the user's query."
+    )
+    context_completeness: GradeItem = Field(
+        description="1-10 scale of source utilization. 10 = successfully extracts and includes all critical information and caveats from the provided sources. 1 = poorly cherry-picks data, leaving out major context or counter-arguments."
+    )
+    formatting_quality: GradeItem = Field(
+        description="1-10 scale of structure and readability. 10 = professional, clean Markdown with logical headers, bullet points, and high readability. 1 = a broken, disorganized wall of text."
+    )
+    synthesis_quality: GradeItem = Field(
+        description="1-10 scale of narrative cohesion. 10 = seamlessly weaves multiple sources together into a logical, flowing narrative. 1 = reads like a disjointed, copy-pasted list of separate summaries."
     )

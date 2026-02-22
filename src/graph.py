@@ -145,7 +145,7 @@ class Writer:
 
     def write(self, state: WriterState):
         logging.info("Entered in the 'write' node")
-        response = Review(is_search_complete=False, justification="An error occurred during review.")
+        response = Write(report="An error occurred during the writing.", confidence="Low confidence due to system error.")
         for _ in range(5):
             try:
                 prompt = [
@@ -173,43 +173,69 @@ class Evaluator:
         self.structured_llm = self.llm.with_structured_output(Evaluate)
         self.system_prompt = EVALUATOR_PROMPT
 
-    def get_best_report_index(self, marks: List[EvaluationItem]):
-        return max(marks, key= lambda report: sum((report.faithfulness, report.answer_relevance, report.context_completeness, report.formatting_quality, report.synthesis_quality))).report_index
-
-    def evaluate(self, state: EvaluatorState):
-        logging.info("Entered in the 'evaluate' node")
-        response = Evaluate(marks=[])
-        indexed_reports = [
-            {"index": i, "report": report_data["report"], "confidence": report_data["confidence"]}
-            for i, report_data in enumerate(state["reports"])
-        ]
+    def grade_report(self, report_data, user_query, summaries):
+        response = Evaluate(
+            faithfulness=GradeItem(grade=1, comment="An error occurred."),
+            answer_relevance=GradeItem(grade=1, comment="An error occurred."),
+            context_completeness=GradeItem(grade=1, comment="An error occurred."),
+            formatting_quality=GradeItem(grade=1, comment="An error occurred."),
+            synthesis_quality=GradeItem(grade=1, comment="An error occurred.")
+        )
         for _ in range(5):
             try:
                 prompt = [
                     SystemMessage(self.system_prompt),
                     SystemMessage(f"[CURRENT DATE AND TIME]: {current_date}"),
-                    SystemMessage(f"[USER QUERY]: {state["user_query"]}"),
-                    SystemMessage(f"[SUMMARIES]: {state["summaries"]}"),
-                    SystemMessage(f"[REPORTS]: {indexed_reports}")
+                    SystemMessage(f"[USER QUERY]: {user_query}"),
+                    SystemMessage(f"[SUMMARIES]: {summaries}"),
+                    SystemMessage(f"[REPORT]: {report_data}")
                 ]
                 response = self.structured_llm.invoke(prompt)
                 break
             except Exception as e:
                 logging.info(e)
-        marks = response.marks
-        best_report_index = 0
-        try:
-            best_report_index = self.get_best_report_index(marks)
-            final_report = state["reports"][best_report_index]["report"]
-        except IndexError as e:
-            logging.info(e)
-            final_report = state["reports"][best_report_index]["report"]
-        logging.info(f"marks: {marks}")
+        logging.info(f"grades: {response}")
+        average_grade = sum(
+            (
+                response.faithfulness.grade,
+                response.answer_relevance.grade,
+                response.context_completeness.grade,
+                response.formatting_quality.grade,
+                response.synthesis_quality.grade
+            )
+        ) / 5
+        return average_grade
+
+    def evaluate(self, state: EvaluatorState):
+        logging.info("Entered in the 'evaluate' node")
+        grades = []
+        for report in state["reports"]:
+            grades.append(
+                {
+                    "report": report["report"],
+                    "grade": self.grade_report(
+                        report_data=report,
+                        user_query=state["user_query"],
+                        summaries=state["summaries"]
+                    )
+                }
+            )
+        final_report = max(grades, key = lambda report: report["grade"])["report"]
+        logging.info(f"grades: {grades}")
         logging.info(f"final_report: {final_report}")
         return {"final_report": final_report}
 
 def route_plan_to_search(state: SystemState):
-    return [Send("search", {"search_query": query_item.query, "user_query": state["user_query"], "search_results": state["search_results"] if "search_results" in state.keys() else []}) for query_item in state["search_queries"]]
+    return [
+        Send(
+            "search",
+             {
+                 "search_query": query_item.query,
+                 "user_query": state["user_query"],
+                 "search_results": state["search_results"] if "search_results" in state.keys() else []
+             }
+        ) for query_item in state["search_queries"]
+    ]
 
 def route_after_review(state: SystemState):
     is_search_complete = reviewer.is_search_complete(state)
@@ -241,7 +267,6 @@ graph.add_conditional_edges(
     route_plan_to_search,
     ["search"]
 )
-
 graph.add_edge("search", "review")
 graph.add_conditional_edges(
     "review",
